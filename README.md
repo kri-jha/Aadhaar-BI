@@ -1,73 +1,82 @@
-# Welcome to your Lovable project
+# Aadhaar Insights Hub
 
-## Project info
+A React + TypeScript + Node.js application for visualizing and analyzing Aadhaar transaction data. This dashboard provides insights into enrollment trends, age demographics, and state-wise performance.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- **Interactive Dashboard**: Visualize trends using Recharts.
+- **Data Ingestion**: Support for Excel/CSV file uploads.
+- **Backend Analysis**: Node.js + Prisma backend for efficient data aggregation.
+- **Responsive Design**: Built with Tailwind CSS and Radix UI.
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+### Frontend
+- **Framework**: React 18 (Vite)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS, Shadcn UI
+- **State Management**: TanStack Query
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Backend
+- **Runtime**: Node.js (Express)
+- **Database**: SQLite (via Prisma ORM)
+- **File Handling**: Multer (for uploads), XLSX/CSV-Parser
 
-Changes made via Lovable will be committed automatically to this repo.
+## Setup & Installation
 
-**Use your preferred IDE**
+### Prerequisites
+- Node.js (v18+)
+- npm
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 1. Clone the Repository
+```bash
+git clone https://github.com/kri-jha/Aadhaar-BI.git
+cd aadhaar-insights-hub
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 2. Install Dependencies
 
-Follow these steps:
+**Frontend:**
+```bash
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+**Backend:**
+```bash
+cd backend
+npm install
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 3. Database Setup (Backend)
+ Initialize the SQLite database:
+```bash
+cd backend
+npx prisma generate
+npx prisma db push
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 4. Running the Application
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+**Start Backend (Port 5000):**
+```bash
+cd backend
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+**Start Frontend (Port 8080):**
+```bash
+# In the root directory
+npm run dev
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Usage
 
-**Use GitHub Codespaces**
+1. Open the dashboard at `http://localhost:8080`.
+2. View the pre-loaded analytics or upload a new dataset via the "Upload Analysis" feature.
+3. Check `KEY_FINDINGS.md` for a summary of the latest data insights.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Project Structure
+- `src/`: Frontend React components and pages.
+- `backend/src/`: Express server and API routes.
+- `backend/prisma/`: Database schema and migrations.
+- `backend/analysis_notebook.ts`: Script for generating analysis reports.
