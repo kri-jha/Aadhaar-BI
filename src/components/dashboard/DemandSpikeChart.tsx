@@ -11,24 +11,22 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 
-const demandData = [
-  { date: "Jan 1", activity: 12500, spike: false },
-  { date: "Jan 8", activity: 13200, spike: false },
-  { date: "Jan 15", activity: 14800, spike: false },
-  { date: "Jan 22", activity: 28500, spike: true },
-  { date: "Jan 29", activity: 15200, spike: false },
-  { date: "Feb 5", activity: 14100, spike: false },
-  { date: "Feb 12", activity: 13800, spike: false },
-  { date: "Feb 19", activity: 26800, spike: true },
-  { date: "Feb 26", activity: 14500, spike: false },
-  { date: "Mar 5", activity: 15800, spike: false },
-  { date: "Mar 12", activity: 16200, spike: false },
-  { date: "Mar 19", activity: 15400, spike: false },
-];
+import { fetchDemandSpikes } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
-const spikePoints = demandData.filter((d) => d.spike);
+interface DemandSpikeChartProps {
+  filters: any;
+}
 
-export function DemandSpikeChart() {
+export function DemandSpikeChart({ filters }: DemandSpikeChartProps) {
+  const { data: demandData, isLoading } = useQuery({
+    queryKey: ["demand-spikes", filters],
+    queryFn: () => fetchDemandSpikes(filters),
+  });
+
+  if (isLoading) return <div className="h-[320px] w-full flex items-center justify-center">Loading...</div>;
+
+  const spikePoints = demandData?.filter((d: any) => d.spike) || [];
   return (
     <Card className="animate-fade-in">
       <CardHeader>
@@ -56,7 +54,7 @@ export function DemandSpikeChart() {
       <CardContent>
         <div className="h-[320px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={demandData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+            <LineChart data={demandData || []} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis
                 dataKey="date"
@@ -91,7 +89,7 @@ export function DemandSpikeChart() {
                 dot={false}
                 activeDot={{ r: 6, fill: "hsl(var(--primary))" }}
               />
-              {spikePoints.map((point, index) => (
+              {spikePoints.map((point: any, index: number) => (
                 <ReferenceDot
                   key={index}
                   x={point.date}

@@ -10,6 +10,9 @@ import { AboutSection } from "@/components/dashboard/AboutSection";
 import { Activity, CalendarDays, AlertTriangle, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { useQuery } from "@tanstack/react-query";
+import { fetchKPIs } from "@/lib/api";
+
 const Index = () => {
   const [activeSection, setActiveSection] = useState("overview");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -18,6 +21,11 @@ const Index = () => {
     state: "all-states",
     district: "all-districts",
     ageGroup: "all-ages",
+  });
+
+  const { data: kpis, isLoading } = useQuery({
+    queryKey: ["kpis", filters],
+    queryFn: () => fetchKPIs(filters),
   });
 
   const handleFilterChange = (key: string, value: string) => {
@@ -33,7 +41,7 @@ const Index = () => {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <KPICard
                 title="Total Aadhaar Activity"
-                value="1.24M"
+                value={isLoading ? "..." : kpis?.totalActivity?.toLocaleString() || "0"}
                 subtitle="Last 30 days"
                 icon={Activity}
                 variant="primary"
@@ -41,22 +49,22 @@ const Index = () => {
               />
               <KPICard
                 title="Peak Demand Date"
-                value="Jan 22"
-                subtitle="28,500 transactions"
+                value={isLoading ? "..." : kpis?.peakDate || "N/A"}
+                subtitle={`${kpis?.peakTransactions?.toLocaleString() || 0} transactions`}
                 icon={CalendarDays}
                 variant="accent"
               />
               <KPICard
                 title="High-Risk Districts"
-                value="7"
+                value={isLoading ? "..." : kpis?.highRiskDistricts || "0"}
                 subtitle="Require immediate attention"
                 icon={AlertTriangle}
                 variant="warning"
               />
               <KPICard
                 title="Dominant Age Group"
-                value="5-17 yrs"
-                subtitle="54% of total activity"
+                value={isLoading ? "..." : kpis?.dominantAgeGroup || "N/A"}
+                subtitle="Most active demographic"
                 icon={Users}
                 variant="default"
               />
@@ -64,43 +72,43 @@ const Index = () => {
 
             {/* Charts Row */}
             <div className="grid gap-6 lg:grid-cols-2">
-              <DemandSpikeChart />
-              <BehavioralPatternChart />
+              <DemandSpikeChart filters={filters} />
+              <BehavioralPatternChart filters={filters} />
             </div>
 
             {/* Risk Table */}
-            <ExclusionRiskTable />
+            <ExclusionRiskTable filters={filters} />
 
             {/* Recommendations */}
-            <RecommendationCards />
+            <RecommendationCards filters={filters} />
           </div>
         );
       case "demand":
         return (
           <div className="space-y-6">
-            <DemandSpikeChart />
+            <DemandSpikeChart filters={filters} />
             <div className="grid gap-6 lg:grid-cols-2">
-              <BehavioralPatternChart />
-              <ExclusionRiskTable />
+              <BehavioralPatternChart filters={filters} />
+              <ExclusionRiskTable filters={filters} />
             </div>
           </div>
         );
       case "exclusion":
         return (
           <div className="space-y-6">
-            <ExclusionRiskTable />
-            <RecommendationCards />
+            <ExclusionRiskTable filters={filters} />
+            <RecommendationCards filters={filters} />
           </div>
         );
       case "behavioral":
         return (
           <div className="space-y-6">
-            <BehavioralPatternChart />
-            <DemandSpikeChart />
+            <BehavioralPatternChart filters={filters} />
+            <DemandSpikeChart filters={filters} />
           </div>
         );
       case "recommendations":
-        return <RecommendationCards />;
+        return <RecommendationCards filters={filters} />;
       case "about":
         return <AboutSection />;
       default:

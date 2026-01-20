@@ -18,15 +18,12 @@ interface RiskData {
   severity: "Low" | "Medium" | "High";
 }
 
-const riskData: RiskData[] = [
-  { district: "Patna", date: "2024-01-22", riskType: "Adult inactivity", severity: "High" },
-  { district: "Lucknow", date: "2024-01-20", riskType: "Zero activity", severity: "High" },
-  { district: "Jaipur", date: "2024-01-19", riskType: "Sudden drop", severity: "Medium" },
-  { district: "Nagpur", date: "2024-01-18", riskType: "Adult inactivity", severity: "Medium" },
-  { district: "Chennai", date: "2024-01-17", riskType: "Sudden drop", severity: "Low" },
-  { district: "Kolkata", date: "2024-01-15", riskType: "Zero activity", severity: "High" },
-  { district: "Ahmedabad", date: "2024-01-14", riskType: "Adult inactivity", severity: "Low" },
-];
+import { fetchExclusionRisk } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+
+interface ExclusionRiskTableProps {
+  filters: any;
+}
 
 const severityConfig = {
   Low: {
@@ -43,7 +40,16 @@ const severityConfig = {
   },
 };
 
-export function ExclusionRiskTable() {
+export function ExclusionRiskTable({ filters }: ExclusionRiskTableProps) {
+  const { data: riskData, isLoading } = useQuery({
+    queryKey: ["exclusion-risk", filters],
+    queryFn: () => fetchExclusionRisk(filters),
+  });
+
+  if (isLoading) return <div className="p-4 text-center">Loading Risk Data...</div>;
+
+  const tableData = riskData || [];
+
   return (
     <Card className="animate-fade-in">
       <CardHeader>
@@ -60,14 +66,14 @@ export function ExclusionRiskTable() {
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="font-semibold">District</TableHead>
-                <TableHead className="font-semibold">Date</TableHead>
-                <TableHead className="font-semibold">Risk Type</TableHead>
+                <TableHead className="font-semibold">Rejection Rate</TableHead>
+                <TableHead className="font-semibold">Center Load</TableHead>
                 <TableHead className="font-semibold">Severity</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {riskData.map((row, index) => {
-                const config = severityConfig[row.severity];
+              {tableData.map((row: any, index: number) => {
+                const config = severityConfig[row.riskLevel as keyof typeof severityConfig] || severityConfig["Low"];
                 const Icon = config.icon;
                 return (
                   <TableRow
@@ -76,13 +82,9 @@ export function ExclusionRiskTable() {
                   >
                     <TableCell className="font-medium">{row.district}</TableCell>
                     <TableCell className="text-muted-foreground">
-                      {new Date(row.date).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {row.rejectionRate}%
                     </TableCell>
-                    <TableCell>{row.riskType}</TableCell>
+                    <TableCell>{row.centerLoad}</TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
@@ -92,7 +94,7 @@ export function ExclusionRiskTable() {
                         )}
                       >
                         <Icon className="w-3 h-3" />
-                        {row.severity}
+                        {row.riskLevel}
                       </Badge>
                     </TableCell>
                   </TableRow>
@@ -102,7 +104,7 @@ export function ExclusionRiskTable() {
           </Table>
         </div>
         <p className="mt-3 text-sm text-muted-foreground">
-          Showing {riskData.length} districts with active exclusion risks
+          Showing {tableData.length} districts with active exclusion risks
         </p>
       </CardContent>
     </Card>

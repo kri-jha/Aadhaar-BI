@@ -11,18 +11,30 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
 
-const ageGroupData = [
-  { name: "0-5 years", value: 42500, color: "hsl(var(--chart-2))" },
-  { name: "5-17 years", value: 68200, color: "hsl(var(--chart-1))" },
-  { name: "18-35 years", value: 35800, color: "hsl(var(--chart-3))" },
-  { name: "35-60 years", value: 28400, color: "hsl(var(--chart-5))" },
-  { name: "60+ years", value: 15200, color: "hsl(var(--muted-foreground))" },
-];
+import { fetchBehavioralPatterns } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
-export function BehavioralPatternChart() {
-  const dominantGroup = ageGroupData.reduce((prev, current) =>
+interface BehavioralPatternChartProps {
+  filters: any;
+}
+
+export function BehavioralPatternChart({ filters }: BehavioralPatternChartProps) {
+  const { data: apiData, isLoading } = useQuery({
+    queryKey: ["behavioral-patterns", filters],
+    queryFn: () => fetchBehavioralPatterns(filters),
+  });
+
+  const chartData = apiData?.map((d: any, i: number) => ({
+    name: d.category,
+    value: d.value,
+    color: ["hsl(var(--chart-2))", "hsl(var(--chart-1))", "hsl(var(--chart-3))", "hsl(var(--chart-5))", "hsl(var(--muted-foreground))"][i % 5]
+  })) || [];
+
+  const dominantGroup = chartData.length > 0 ? chartData.reduce((prev: any, current: any) =>
     prev.value > current.value ? prev : current
-  );
+  ) : { value: 0, name: "N/A" };
+
+  if (isLoading) return <div className="h-[280px] w-full flex items-center justify-center">Loading...</div>;
 
   return (
     <Card className="animate-fade-in">
@@ -37,7 +49,7 @@ export function BehavioralPatternChart() {
       <CardContent>
         <div className="h-[280px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={ageGroupData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis
                 dataKey="name"
@@ -52,7 +64,7 @@ export function BehavioralPatternChart() {
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
                 tickLine={false}
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                tickFormatter={(value) => value.toLocaleString()}
               />
               <Tooltip
                 contentStyle={{
@@ -62,10 +74,10 @@ export function BehavioralPatternChart() {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 }}
                 labelStyle={{ color: "hsl(var(--foreground))", fontWeight: 600 }}
-                formatter={(value: number) => [value.toLocaleString(), "Activity"]}
+                formatter={(value: number) => [value.toLocaleString() + "%", "Share"]}
               />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {ageGroupData.map((entry, index) => (
+                {chartData.map((entry: any, index: number) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Bar>

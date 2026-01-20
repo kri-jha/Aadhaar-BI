@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AadhaarTransaction {
+  id              String   @id @default(uuid())
+  date            DateTime
+  state           String
+  district        String
+  ageGroup        String   @map("age_group")
+  enrollmentCount Int      @map("enrollment_count")
+  updateCount     Int      @map("update_count")
+  rejectionCount  Int      @map("rejection_count")
+  centerLoad      Float    @map("center_load")
+  gender          String?
+  pincode         String?
+
+  @@map("aadhaar_transactions")
+}
+
+model AnalysisSubmission {
+  id              String   @id @default(uuid())
+  participantName String   @map("participant_name")
+  description     String?
+  filePath        String   @map("file_path")
+  submittedAt     DateTime @default(now()) @map("submitted_at")
+
+  @@map("analysis_submissions")
+}

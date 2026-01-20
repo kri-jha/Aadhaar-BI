@@ -10,32 +10,12 @@ interface Recommendation {
   impact: string;
 }
 
-const recommendations: Recommendation[] = [
-  {
-    insight: "Predictable child-only spike detected in January and February",
-    action: "Deploy school-aligned Aadhaar enrollment camps during academic registration periods",
-    priority: "High",
-    impact: "Could reduce exclusion risk for 15,000+ children",
-  },
-  {
-    insight: "Adult inactivity pattern in 3 rural districts",
-    action: "Set up mobile enrollment units in underserved areas with extended hours",
-    priority: "High",
-    impact: "Address potential exclusion of 8,000 adults from welfare schemes",
-  },
-  {
-    insight: "Sudden activity drop post-deadline in scheme enrollment",
-    action: "Implement pre-deadline awareness campaigns 2 weeks before scheme deadlines",
-    priority: "Medium",
-    impact: "Improve scheme coverage by estimated 12%",
-  },
-  {
-    insight: "Zero activity zones identified in border districts",
-    action: "Coordinate with district administration for special enrollment drives",
-    priority: "Medium",
-    impact: "Bring 5,000+ residents into Aadhaar coverage",
-  },
-];
+import { fetchRecommendations } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+
+interface RecommendationCardsProps {
+  filters: any;
+}
 
 const priorityStyles = {
   High: "bg-destructive/10 text-destructive border-destructive/20",
@@ -43,7 +23,16 @@ const priorityStyles = {
   Low: "bg-success/10 text-success border-success/20",
 };
 
-export function RecommendationCards() {
+export function RecommendationCards({ filters }: RecommendationCardsProps) {
+  const { data: recData, isLoading } = useQuery({
+    queryKey: ["recommendations", filters],
+    queryFn: () => fetchRecommendations(filters),
+  });
+
+  const recommendations = recData || [];
+
+  if (isLoading) return <div>Loading Recommendations...</div>;
+
   return (
     <Card className="animate-fade-in">
       <CardHeader>
@@ -63,7 +52,7 @@ export function RecommendationCards() {
       </CardHeader>
       <CardContent>
         <div className="grid gap-4 md:grid-cols-2">
-          {recommendations.map((rec, index) => (
+          {recommendations.map((rec: any, index: number) => (
             <div
               key={index}
               className="p-4 rounded-lg border border-border bg-card hover:shadow-md transition-shadow"
@@ -72,7 +61,7 @@ export function RecommendationCards() {
                 <span
                   className={cn(
                     "text-xs font-medium px-2 py-1 rounded-full border",
-                    priorityStyles[rec.priority]
+                    priorityStyles[rec.priority as keyof typeof priorityStyles] || priorityStyles["Low"]
                   )}
                 >
                   {rec.priority} Priority
@@ -81,17 +70,18 @@ export function RecommendationCards() {
               <div className="space-y-3">
                 <div>
                   <p className="text-sm font-medium text-foreground">
-                    {rec.insight}
+                    {rec.title}
                   </p>
                 </div>
                 <div className="flex items-start gap-2">
                   <ArrowRight className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-muted-foreground">{rec.action}</p>
+                  <p className="text-sm text-muted-foreground">{rec.reason}</p>
                 </div>
-                <div className="flex items-start gap-2 pt-2 border-t border-border">
+                {/* Impact is not in API yet, hiding or hardcoding */}
+                {/* <div className="flex items-start gap-2 pt-2 border-t border-border">
                   <CheckCircle2 className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-muted-foreground">{rec.impact}</p>
-                </div>
+                </div> */}
               </div>
             </div>
           ))}
